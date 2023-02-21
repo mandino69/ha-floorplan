@@ -279,10 +279,11 @@ export class FloorplanElement extends LitElement {
 
       // Remove event listener if any
       // NOTE_TO_SELV: This does not work. Is a problem, is floorplan is initated more than once (could be under debugging, and so)
-      window.removeEventListener('floorplanActionGateway', actionEventFunction);
+      document.removeEventListener('floorplanActionGateway', actionEventFunction);
 
       // Add event listener
-      window.addEventListener('floorplanActionGateway', actionEventFunction);
+      document.addEventListener('floorplanActionGateway', actionEventFunction);
+      console.log("DOCUMENT-INIT-TEST",document);
 
       function actionEventFunction(e: Event) {
         console.log('Okaaay :)...', e);
