@@ -85,17 +85,36 @@ export class Utils {
 
   static setText(
     textElement: HTMLElement | SVGGraphicsElement,
-    text: string
+    text: string,
+    shiftAxisY: string
   ): void {
-    let tspanElement = textElement.querySelector('tspan');
-    if (!tspanElement) {
-      tspanElement = document.createElementNS(
+    console.log("Bob");
+    // If text contains linebreakes, let's split the text into multiple tspans, cause tspans doesnt allow linebreakes
+    const texts = text.split('\n');
+
+    // Empty the current text element
+    textElement.textContent = '';
+
+    // Get x location of text, if no found, set to 0
+    const textXPosition = textElement.getAttribute('x') || '0';
+
+    // Dy indicates a shift along the y-axis, for every tspan in the text element except the first one
+    const dy = shiftAxisY ? shiftAxisY : '1em'
+    
+    texts.forEach((textPart, i) => {
+      const tspanElement = document.createElementNS(
         'http://www.w3.org/2000/svg',
         'tspan'
       );
+      tspanElement.textContent = textPart;
+
+      if (texts.length > 1){
+        // Add x + dy if more than one string (linebreakes)
+        tspanElement.setAttribute('x', textXPosition);
+        tspanElement.setAttribute('dy', (i >= 1 ? dy : '0'));
+      }
       textElement.appendChild(tspanElement);
-    }
-    tspanElement.textContent = text;
+    })
   }
 
   static waitForChildNodes(

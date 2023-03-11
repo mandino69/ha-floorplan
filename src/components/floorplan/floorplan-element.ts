@@ -2179,7 +2179,10 @@ export class FloorplanElement extends LitElement {
             typeof serviceData === 'string'
               ? serviceData
               : (serviceData.text as string);
-          Utils.setText(targetSvgElement, text);
+
+          // If the text has linebreakes, setText will split them up, into more than a single tspan element. Each tspan will use the shift y axis as a offset (except for the first element)
+          const shiftYAxis = actionConfig.service_data?.shift_y_axis ? actionConfig.service_data?.shift_y_axis : '1em';
+          Utils.setText(targetSvgElement, text, shiftYAxis);
         }
         break;
 
