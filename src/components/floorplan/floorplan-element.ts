@@ -739,7 +739,7 @@ export class FloorplanElement extends LitElement {
       );
 
       svgElement.onmouseover = () => {
-        this.handleEntityIdSetHoverOver(entityId);
+        this.handleEntityIdSetHoverOver(entityId, svgElementInfo);
       };
     }
 
@@ -827,7 +827,7 @@ export class FloorplanElement extends LitElement {
     );
 
     svgElementInfo.svgElement.onmouseover = () => {
-      this.handleEntityIdSetHoverOver(entityId);
+      this.handleEntityIdSetHoverOver(entityId, svgElementInfo);
     };
 
     return svg;
@@ -1129,7 +1129,7 @@ export class FloorplanElement extends LitElement {
         }
 
         svgElement.onmouseover = () => {
-          this.handleEntitySetHoverOver(entityInfo);
+          this.handleEntitySetHoverOver(entityInfo, svgElementInfo);
         };
 
         this.attachClickHandlers(
@@ -1524,12 +1524,12 @@ export class FloorplanElement extends LitElement {
     }
   }
 
-  handleEntityIdSetHoverOver(entityId: string): void {
+  handleEntityIdSetHoverOver(entityId: string, svgElementInfo: FloorplanSvgElementInfo): void {
     const entityInfo = this.entityInfos[entityId];
-    if (entityInfo) this.handleEntitySetHoverOver(entityInfo);
+    if (entityInfo) this.handleEntitySetHoverOver(entityInfo, svgElementInfo);
   }
 
-  handleEntitySetHoverOver(entityInfo: FloorplanEntityInfo): void {
+  handleEntitySetHoverOver(entityInfo: FloorplanEntityInfo, svgElementInfo: FloorplanSvgElementInfo): void {
     const entityId = entityInfo.entityId as string;
     const entityState = this.hass.states[entityId];
 
@@ -1587,6 +1587,46 @@ export class FloorplanElement extends LitElement {
                 titleElement.textContent = titleText;
               });
           }
+        } else if ("hover_action" in ruleInfo.rule){
+          try{
+
+            //console.log("#Lol1", ruleInfo.rule.hover_action);
+            //console.log("#Lol2", isHoverInfo);
+            //console.log("#Lol3", ruleInfo);
+            const context = this as unknown as FloorplanClickContext;
+            // console.log("### Not3");
+            // console.log("### Not4", context);
+            // console.log("### Not5", this);
+            //const actions = Array.isArray(ruleInfo.rule.hover_action) ? ruleInfo.rule.hover_action : [ruleInfo.rule.hover_action] as FloorplanActionConfig[];
+            //console.log("#Lol4", ruleInfo.rule.hover_action as FloorplanActionConfig[])
+            //console.log("#Lol4", ruleInfo.rule.hover_action)
+
+            // for (const svgElementInfo of Object.values(
+            //   ruleInfo.svgElementInfos
+            // )) {
+
+              /// TODO: Right now every element is triggered. 
+              // You'll need to get the current Svg Element context instead!
+              //console.log("#Lol5", svgElementInfo);
+              //console.log("#Lol6", entityInfo.ruleInfos);
+              //console.log("#Lol6!..", entityId, entityInfo, entityState, context);
+              //console.log(svgElementInfo.entityId);
+              //console.log(ruleInfo.rule.element);
+
+              if (svgElementInfo.entityId === ruleInfo.rule.element)
+                this.handleActions(
+                  ruleInfo.rule.hover_action as FloorplanActionConfig[],
+                  entityId,
+                  svgElementInfo,
+                  ruleInfo
+                )
+            // }
+          } catch(e){
+            // Nothing to do right now
+          }
+
+
+
         }
       }
     }
@@ -1729,6 +1769,8 @@ export class FloorplanElement extends LitElement {
   ): void {
     const allActionConfigs = this.getActionConfigs(actionConfigs);
 
+    //console.log("Jaja...", { actionConfigs: actionConfigs, allActionConfigs: allActionConfigs, entityId: entityId, svgElementInfo: svgElementInfo, ruleInfo: ruleInfo });
+
     for (const actionConfig of allActionConfigs) {
       if (
         actionConfig.confirmation &&
@@ -1809,6 +1851,10 @@ export class FloorplanElement extends LitElement {
         }
 
         case 'call-service': {
+          //console.log("Mmm.actionConfig..", actionConfig, actionConfig);
+          //console.log("Mmm.entityId..", entityId);
+          //console.log("Mmm.svgElementInfo..", svgElementInfo);
+          //console.log("Mmm.ruleInfo..", ruleInfo);
           if (!actionConfig.service) {
             // forwardHaptic("failure");
             return;
