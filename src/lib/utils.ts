@@ -107,6 +107,7 @@ export class Utils {
       );
       tspanElement.textContent = textPart;
 
+      // If more than one text string, use y-axis offset
       if (texts.length > 1){
         // Add x + dy if more than one string (linebreakes)
         tspanElement.setAttribute('x', textXPosition);
