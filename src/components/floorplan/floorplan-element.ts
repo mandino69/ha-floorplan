@@ -8,6 +8,7 @@ import {
   FloorplanPageConfig,
   FloorplanActionConfig,
   FloorplanCallServiceActionConfig,
+  FloorplanCustomEvent,
 } from './lib/floorplan-config';
 import {
   FloorplanRuleConfig,
@@ -50,6 +51,13 @@ const E = OuiDomEvents;
 declare const NAME: string;
 declare const DESCRIPTION: string;
 declare const VERSION: string;
+
+// Prepare Window as a global property
+declare global {
+  interface Window {
+    floorplan: any;
+  }
+}
 
 // Display version in console
 console.info(
@@ -264,6 +272,38 @@ export class FloorplanElement extends LitElement {
         await this.initMultiPage();
       } else {
         await this.initSinglePage();
+      }
+
+      // Expose "callService" to the window
+      var _thisBinded = this;
+
+      // Remove event listener if any
+      // NOTE_TO_SELV: This does not work. Is a problem, is floorplan is initated more than once (could be under debugging, and so)
+      window.removeEventListener('floorplanActionGateway', actionEventFunction);
+
+      // Add event listener
+      window.addEventListener('floorplanActionGateway', actionEventFunction);
+
+      function actionEventFunction(e: Event) {
+        console.log('Okaaay :)...', e);
+        const actionData = e as FloorplanCustomEvent;
+
+        executeFloorplanServiceFunction(actionData, _thisBinded);
+      }
+      function executeFloorplanServiceFunction(
+        ev: FloorplanCustomEvent,
+        _thisBinded: any
+      ) {
+        console.log('Executing floorplan service function', ev);
+
+        const [domain, service] = ev.detail.service.split('.', 2);
+        _thisBinded.callFloorplanService(
+          domain,
+          service,
+          ev.detail as FloorplanCallServiceActionConfig,
+          ev.detail.entity,
+          ev.detail.element
+        );
       }
     } catch (err) {
       this.handleError(err as Error);
